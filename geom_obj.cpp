@@ -6,12 +6,20 @@ bool equal_null(float x) {
 
 namespace g_obj {
 
+    float det(float a, float b, float c, float d) {
+        return a*d - b*c;
+    }
+
     float scalar_mult(const vector_t &vect1, const vector_t vect2) {
         return vect1.x*vect2.x + vect1.y*vect2.y + vect1.z*vect2.z;
     }
 
-    float det(float a, float b, float c, float d) {
-        return a*c - b*d;
+    vector_t vect_mult(const vector_t &vect1, const vector_t &vect2) {
+        vector_t ret;
+        ret.x =  det(vect1.y, vect1.z, vect2.y, vect2.z);
+        ret.y = -det(vect1.x, vect1.z, vect2.x, vect2.z);
+        ret.z =  det(vect1.x, vect1.y, vect2.x, vect2.y);
+        return ret;
     }
 
     //-------------------------------------
@@ -48,7 +56,7 @@ namespace g_obj {
     }
 
     //-------------------------------------
-    // line_t (point and direction vector as point)
+    // line_t (point and direction vector)
     //-------------------------------------
     bool line_t::parallelism(const line_t &another) const {
         return equal_null(scalar_mult(vec_, another.vec_.get_normal()));
@@ -72,6 +80,40 @@ namespace g_obj {
         return {vec_.x*k + point_.x,
                 vec_.y*k + point_.y,
                 vec_.z*k + point_.z};
+    }
+
+    //-------------------------------------
+    // plane_t (three points)
+    //-------------------------------------
+    plane_t::plane_t(const point_t &p1, const point_t &p2, const point_t &p3) {
+        assert(p1.valid() && p2.valid() && p3.valid());
+        a = (p1.y-p2.y)*(p2.z-p3.z) - (p2.y-p3.y)*(p1.z-p2.z);
+        b = (p1.z-p2.z)*(p2.x-p3.x) - (p1.x-p2.x)*(p2.z-p3.z);
+        c = (p1.x-p2.x)*(p2.y-p3.y) - (p2.x-p3.x)*(p1.y-p2.y);
+        d = p1.x*((p1.z-p2.z)*(p2.y-p3.y) - (p2.z-p3.z)*(p1.y-p2.y)) +
+            p1.y*((p1.x-p2.x)*(p2.z-p3.z) - (p2.x-p3.x)*(p1.z-p2.z)) +
+            p1.z*((p1.y-p2.y)*(p2.x-p3.x) - (p2.y-p3.y)*(p1.x-p2.x));
+    } 
+
+    vector_t plane_t::get_normal() const {
+        assert(valid());
+        return {a, b, c};
+    }
+
+    line_t plane_t::line_of_intersect(const plane_t &another) const {
+        assert(valid() && another.valid());
+        //find point inter_p in line_of_intersect (z = 0)
+        float det0 = det(a, b, another.a, another.b);
+        float det1 = det(-d, b, -another.d, another.b);
+        float det2 = det(a, -d, another.a, -another.d);
+        point_t inter_p;
+        inter_p.x = det1/det0; inter_p.y = det2/det0; inter_p.z = 0;
+
+        //find direction vector of line_of_intersect
+        vector_t inter_v;
+        inter_v = vect_mult(get_normal(), another.get_normal());
+
+        return {inter_p, inter_v};
     }
 
 } // namespace g_obj

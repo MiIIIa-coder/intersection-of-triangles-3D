@@ -19,13 +19,10 @@ namespace g_obj {
         float x = NAN, y = NAN, z = NAN;
 
         void print() const { std::cout << "(" << x << " ; " << y << " ; " << z << ")" << std::endl; }
-
         bool valid() const { return !(x != x || y!= y || z!=z); }
-
         vector_t operator-(const vector_t &another) const {
             return {x - another.x, y - another.y, z - another.z};
         }
-
         vector_t get_normal() const;
  
     };
@@ -39,9 +36,7 @@ namespace g_obj {
         float x = NAN, y = NAN, z = NAN;
 
         void print() const { std::cout << "(" << x << " ; " << y << " ; " << z << ")" << std::endl; }
-
         bool valid() const { return !(x != x || y!= y || z!=z); }
-
         bool equal(const point_t &another) const {
             assert(valid() && another.valid());
             return (std::abs(x - another.x) < flt_tolerance &&
@@ -66,8 +61,8 @@ namespace g_obj {
 
         line_t(const point_t point, const vector_t vec) : point_(point), vec_(vec) {}
 
+        void print() const { point_.print(); vec_.print(); }
         bool parallelism(const line_t &another) const;
-
         bool point_belong(const point_t &point) const;
 
         //return point of intersect if it exist
@@ -86,9 +81,21 @@ namespace g_obj {
         line_segment(const point_t &p1, const point_t &p2) : p1_(p1), p2_(p2)  {}
 
         float len() const;
-        line_t get_line() const;
+        line_t get_line() const;  //where line_segment lives
     };
-    
+
+    //-------------------------------------
+    // plane (three points)
+    //-------------------------------------
+    struct plane_t {
+        float a = NAN, b = NAN, c = NAN, d = NAN;
+
+        plane_t(const point_t &p1, const point_t &p2, const point_t &p3);
+
+        bool valid() const { return !(a != a || b!= b || c!=c || d!=d); }
+        vector_t get_normal() const;
+        line_t line_of_intersect(const plane_t &another) const;
+    };
 
 }
 
