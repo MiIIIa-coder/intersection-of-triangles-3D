@@ -39,6 +39,13 @@ namespace g_obj {
             return {1.0, 1.0, -(x+y)/z};
     }
 
+    bool vector_t::equal(const vector_t &another) const {
+        assert(valid() && another.valid());
+        return (std::abs(x - another.x) < flt_tolerance &&
+                std::abs(y - another.y) < flt_tolerance &&
+                std::abs(z - another.z) < flt_tolerance);
+    }
+
     //-------------------------------------
     // line_segment (two points)
     //-------------------------------------
@@ -100,18 +107,25 @@ namespace g_obj {
         return {a, b, c};
     }
 
+    //if planes are parallel return non-valid line
     line_t plane_t::line_of_intersect(const plane_t &another) const {
         assert(valid() && another.valid());
+
+        //find direction vector of line_of_intersect
+        vector_t inter_v;
+        inter_v = vect_mult(get_normal(), another.get_normal());
+        if (inter_v.equal({0, 0, 0})) {
+            point_t point;
+            vector_t vector;
+            return {point, vector};
+        }
+
         //find point inter_p in line_of_intersect (z = 0)
         float det0 = det(a, b, another.a, another.b);
         float det1 = det(-d, b, -another.d, another.b);
         float det2 = det(a, -d, another.a, -another.d);
         point_t inter_p;
         inter_p.x = det1/det0; inter_p.y = det2/det0; inter_p.z = 0;
-
-        //find direction vector of line_of_intersect
-        vector_t inter_v;
-        inter_v = vect_mult(get_normal(), another.get_normal());
 
         return {inter_p, inter_v};
     }

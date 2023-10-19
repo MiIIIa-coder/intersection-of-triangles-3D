@@ -20,6 +20,7 @@ namespace g_obj {
 
         void print() const { std::cout << "(" << x << " ; " << y << " ; " << z << ")" << std::endl; }
         bool valid() const { return !(x != x || y!= y || z!=z); }
+        bool equal(const vector_t &another) const;
         vector_t operator-(const vector_t &another) const {
             return {x - another.x, y - another.y, z - another.z};
         }
