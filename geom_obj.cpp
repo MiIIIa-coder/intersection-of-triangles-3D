@@ -130,4 +130,28 @@ namespace g_obj {
         return {inter_p, inter_v};
     }
 
+    //-------------------------------------
+    // triangle_t (three points)
+    //-------------------------------------
+    void triangle_t::print() const {
+        for (int i = 0; i < vertices.size(); ++i) {
+            vertices[i].print();
+        }
+
+        std::cout << "plane: " << std::endl;
+        plane.print();
+        std::cout << "normal vector: " << std::endl;
+        plane.get_normal().print();
+
+        std::cout << "lines on triangle's sides" << std::endl;
+        for (int i = 0; i < lines.size(); ++i) {
+            lines[i].print();
+        }
+
+        if (inter)
+            std::cout << "true" << std::endl;
+        else 
+            std::cout << "false" << std::endl;
+    }
+
 } // namespace g_obj

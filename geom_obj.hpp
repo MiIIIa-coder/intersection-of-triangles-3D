@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <cassert>
+#include <vector>
 
 #define flt_tolerance 0.00001
 #define inter_vol_width 100
@@ -86,7 +87,7 @@ namespace g_obj {
     };
 
     //-------------------------------------
-    // plane (three points)
+    // plane (ax+by+cz+d=0)
     //-------------------------------------
     struct plane_t {
         float a = NAN, b = NAN, c = NAN, d = NAN;
@@ -94,10 +95,24 @@ namespace g_obj {
         plane_t(const point_t &p1, const point_t &p2, const point_t &p3);
 
         bool valid() const { return !(a != a || b!= b || c!=c || d!=d); }
+        void print() const { if (valid()) std::cout << a << b << c << d << std::endl;
+                             else std::cout << "non-valid data of plane" << std::endl;}
         vector_t get_normal() const;
         line_t line_of_intersect(const plane_t &another) const;
     };
 
+    //-------------------------------------
+    // triangle_t (three points)
+    //-------------------------------------
+    struct triangle_t {
+        std::vector<point_t> vertices;
+        plane_t plane;
+        std::vector<line_t> lines;
+        bool inter {false};
+
+        void print() const;
+    };
+    
 }
 
 #endif
