@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cassert>
 #include <vector>
+#include <stdlib.h>
 
 #define flt_tolerance 0.00001
 #define inter_vol_width 100
@@ -45,6 +46,7 @@ namespace g_obj {
                     std::abs(y - another.y) < flt_tolerance &&
                     std::abs(z - another.z) < flt_tolerance);
         }
+        float distance(const point_t &another) const; 
 
         //this - another
         vector_t operator-(const point_t &another) const {
@@ -58,8 +60,13 @@ namespace g_obj {
     // line_t (point and direction vector as point)
     //-------------------------------------
     struct  line_t {
-        point_t  point_ {0.0, 0.0, 0.0};
-        vector_t vec_   {1.0, 1.0, 1.0};  //point - (0;0;0) <=> vector
+        point_t  point_;
+        vector_t vec_;  //point - (0;0;0) <=> vector
+
+        line_t() {
+            point_ = {0.0, 0.0, 0.0};
+            vec_ = {1.0, 1.0, 1.0};
+        }
 
         line_t(const point_t point, const vector_t vec) : point_(point), vec_(vec) {}
 
@@ -77,8 +84,14 @@ namespace g_obj {
     // line_segment (two points)
     //-------------------------------------
     struct line_segment {
-        point_t p1_{0.0, 0.0, 0.0};
-        point_t p2_{1.0, 1.0, 1.0};
+
+        point_t p1_;
+        point_t p2_;
+
+        line_segment() {
+            p1_ = {0.0, 0.0, 0.0};
+            p2_ = {1.0, 1.0, 1.0};
+        }
 
         line_segment(const point_t &p1, const point_t &p2) : p1_(p1), p2_(p2)  {}
 
@@ -90,12 +103,16 @@ namespace g_obj {
     // plane (ax+by+cz+d=0)
     //-------------------------------------
     struct plane_t {
-        float a = NAN, b = NAN, c = NAN, d = NAN;
+        float a, b ,c ,d;
+
+        plane_t() {
+            a = b = c = d = NAN;
+        }
 
         plane_t(const point_t &p1, const point_t &p2, const point_t &p3);
 
         bool valid() const { return !(a != a || b!= b || c!=c || d!=d); }
-        void print() const { if (valid()) std::cout << a << b << c << d << std::endl;
+        void print() const { if (valid()) std::cout << a << " " << b << " " << c << " " << d << std::endl;
                              else std::cout << "non-valid data of plane" << std::endl;}
         vector_t get_normal() const;
         line_t line_of_intersect(const plane_t &another) const;

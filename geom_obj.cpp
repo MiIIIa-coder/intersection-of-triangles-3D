@@ -47,6 +47,15 @@ namespace g_obj {
     }
 
     //-------------------------------------
+    // point_t
+    //-------------------------------------
+    float point_t::distance(const point_t &another) const {
+        return sqrt((x - another.x)*(x - another.x) +
+                    (y - another.y)*(y - another.y) +
+                    (z - another.z)*(z - another.z));
+    }
+
+    //-------------------------------------
     // line_segment (two points)
     //-------------------------------------
     float line_segment::len() const {
@@ -134,7 +143,7 @@ namespace g_obj {
     // triangle_t (three points)
     //-------------------------------------
     void triangle_t::print() const {
-        for (int i = 0; i < vertices.size(); ++i) {
+        for (size_t i = 0; i < vertices.size(); ++i) {
             vertices[i].print();
         }
 
@@ -144,7 +153,7 @@ namespace g_obj {
         plane.get_normal().print();
 
         std::cout << "lines on triangle's sides" << std::endl;
-        for (int i = 0; i < lines.size(); ++i) {
+        for (size_t i = 0; i < lines.size(); ++i) {
             lines[i].print();
         }
 
