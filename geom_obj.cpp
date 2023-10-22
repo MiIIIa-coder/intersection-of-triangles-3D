@@ -10,7 +10,7 @@ namespace g_obj {
         return a*d - b*c;
     }
 
-    float scalar_mult(const vector_t &vect1, const vector_t vect2) {
+    float scalar_mult(const vector_t &vect1, const vector_t &vect2) {
         return vect1.x*vect2.x + vect1.y*vect2.y + vect1.z*vect2.z;
     }
 
@@ -44,6 +44,11 @@ namespace g_obj {
         return (std::abs(x - another.x) < flt_tolerance &&
                 std::abs(y - another.y) < flt_tolerance &&
                 std::abs(z - another.z) < flt_tolerance);
+    }
+
+    bool vector_t::parallelism(const vector_t &another) const {
+        assert(valid() && another.valid());
+        return equal_null(scalar_mult(another, *this));
     }
 
     //-------------------------------------
@@ -120,12 +125,22 @@ namespace g_obj {
     point_t line_t::point_of_intersect(const line_t &another) const {
         point_t ret;
 
-        if (parallelism(another)) return ret;
+        float det0   = det(vec_.x, -another.vec_.x, vec_.y, -another.vec_.y);
+        float det0_1 = det(vec_.y, -another.vec_.y, vec_.z, -another.vec_.z);
 
-        float det0 = det(vec_.x, -another.vec_.x, vec_.y, -another.vec_.y);
-        float det1 = det(another.point_.x - point_.x, -another.vec_.x,
-                         another.point_.y - point_.y, -another.vec_.y);
-        float k = det1/det0;
+        if (equal_null(det0) && equal_null(det0_1)) return ret;
+
+        float k;
+        if (!equal_null(det0)) {
+            float det1 = det(another.point_.x - point_.x, -another.vec_.x,
+                             another.point_.y - point_.y, -another.vec_.y);
+            k = det1/det0;
+        }
+        else {
+            float det2 = det(another.point_.y - point_.y, -another.vec_.y,
+                             another.point_.z - point_.z, -another.vec_.z);
+            k = det2/det0_1;
+        }
 
         return {vec_.x*k + point_.x,
                 vec_.y*k + point_.y,
@@ -148,6 +163,12 @@ namespace g_obj {
     vector_t plane_t::get_normal() const {
         assert(valid());
         return {a, b, c};
+    }
+
+    vector_t plane_t::get_normal(line_t &line) const {
+        assert(valid() && line.point_.valid() && line.vec_.valid());
+
+        return vect_mult(get_normal(), line.vec_);
     }
 
     //if planes are parallel return non-valid line

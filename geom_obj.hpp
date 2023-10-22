@@ -23,6 +23,7 @@ namespace g_obj {
         void print() const { std::cout << "(" << x << " ; " << y << " ; " << z << ")" << std::endl; }
         bool valid() const { return !(x != x || y!= y || z!=z); }
         bool equal(const vector_t &another) const;
+        bool parallelism(const vector_t &another) const;
         vector_t operator-(const vector_t &another) const {
             return {x - another.x, y - another.y, z - another.z};
         }
@@ -114,7 +115,8 @@ namespace g_obj {
         bool valid() const { return !(a != a || b!= b || c!=c || d!=d); }
         void print() const { if (valid()) std::cout << a << " " << b << " " << c << " " << d << std::endl;
                              else std::cout << "non-valid data of plane" << std::endl;}
-        vector_t get_normal() const;
+        vector_t get_normal() const;              //normal of this plane
+        vector_t get_normal(line_t &line) const;  //normal of line (normal in plane)
         line_t line_of_intersect(const plane_t &another) const;
     };
 
