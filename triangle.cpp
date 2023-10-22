@@ -1,7 +1,6 @@
 #include "geom_obj.hpp"
 
 #define TEST_INTER_PLANES 0
-#define READY 1
 
 g_obj::triangle_t get_triangle() {
     std::vector<g_obj::point_t> verts(3);
@@ -35,11 +34,12 @@ std::vector<g_obj::point_t> find_inter_points(const g_obj::triangle_t &tr,
 
     std::vector<g_obj::point_t> inter_points(2);
     int count_inters{0};
+
     for (int i = 0; i < 3 && count_inters < 2; i++) {
         if (inter_line.parallelism(tr.lines[i])) {            //if lines are parallel
             if (inter_line.point_belong(tr.vertices[i]) &&
                 inter_line.point_belong(tr.vertices[(i+1)%3])) {
-                inter_points[0] = tr.vertices[i]; inter_points[1] = tr.vertices[i];
+                inter_points[0] = tr.vertices[i]; inter_points[1] = tr.vertices[(i+1)%3];
                 count_inters = 2;
                 break;
             }
@@ -81,7 +81,6 @@ bool check_tr_inter(const g_obj::triangle_t &tr1, const g_obj::triangle_t &tr2) 
     inter_points1 = find_inter_points(tr1, inter_line);
     inter_points2 = find_inter_points(tr2, inter_line);
 
-    inter_points1[0].print();
     if (inter_points1[0].equal(inter_points1[1])) {
         if (inter_points2[0].equal(inter_points2[1])) {
             if (inter_points1[0].equal(inter_points2[0]))

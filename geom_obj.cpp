@@ -79,6 +79,40 @@ namespace g_obj {
     }
 
     bool line_t::point_belong(const point_t &point) const {
+    
+    //Ox, Oy, Oz
+        if (equal_null(vec_.y) && equal_null(vec_.z)) {
+            if (equal_null(point.y) && equal_null(point.z))
+                return true;
+            else { return false; } }
+
+        if (equal_null(vec_.x) && equal_null(vec_.z)) {
+            if (equal_null(point.x) && equal_null(point.z))
+                return true;
+            else { return false; } }
+
+        if (equal_null(vec_.x) && equal_null(vec_.y)) {
+            if (equal_null(point.x) && equal_null(point.y))
+                return true;
+            else { return false; } }
+    
+    //in Oxy, Oxz, Oyz
+        if (equal_null(vec_.z)) {
+            if (equal_null(point.z) && equal_null((point.x - point_.x)/vec_.x - (point.y - point_.y)/vec_.y))
+                return true;
+            else { return false; } }
+        
+        if (equal_null(vec_.y)) {
+            if (equal_null(point.y) && equal_null((point.x - point_.x)/vec_.x - (point.z - point_.z)/vec_.z))
+                return true;
+            else { return false; } }
+        
+        if (equal_null(vec_.x)) {
+            if (equal_null(point.x) && equal_null((point.y - point_.y)/vec_.y - (point.z - point_.z)/vec_.z))
+                return true;
+            else { return false; } }
+            
+    //general case
         return equal_null((point.x - point_.x)/vec_.x - (point.y - point_.y)/vec_.y) &&
                equal_null((point.y - point_.y)/vec_.y - (point.z - point_.z)/vec_.z);
     }
