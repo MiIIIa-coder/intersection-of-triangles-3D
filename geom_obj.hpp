@@ -23,7 +23,7 @@ namespace g_obj {
         void print() const { std::cout << "(" << x << " ; " << y << " ; " << z << ")" << std::endl; }
         bool valid() const { return !(x != x || y!= y || z!=z); }
         bool equal(const vector_t &another) const;
-        bool parallelism(const vector_t &another) const;
+        bool ortogonality(const vector_t &another) const;
         vector_t operator-(const vector_t &another) const {
             return {x - another.x, y - another.y, z - another.z};
         }
@@ -115,6 +115,8 @@ namespace g_obj {
         bool valid() const { return !(a != a || b!= b || c!=c || d!=d); }
         void print() const { if (valid()) std::cout << a << " " << b << " " << c << " " << d << std::endl;
                              else std::cout << "non-valid data of plane" << std::endl;}
+        bool parallelism(const plane_t &another) const;
+        bool equal_parallel(const plane_t &another) const;
         vector_t get_normal() const;              //normal of this plane
         vector_t get_normal(line_t &line) const;  //normal of line (normal in plane)
         line_t line_of_intersect(const plane_t &another) const;
@@ -130,7 +132,13 @@ namespace g_obj {
         bool inter {false};
 
         void print() const;
+        std::vector<g_obj::point_t> find_inter_points(const g_obj::line_t &inter_line) const;
+        bool check_tr_inter(const g_obj::triangle_t &tr2) const;
     };
+
+    float det(float a, float b, float c, float d);
+    float scalar_mult(const vector_t &vect1, const vector_t &vect2);
+    vector_t vect_mult(const vector_t &vect1, const vector_t &vect2);
     
 }
 

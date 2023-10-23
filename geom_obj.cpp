@@ -22,6 +22,22 @@ namespace g_obj {
         return ret;
     }
 
+    //check for belonging point to segment of inter_points
+    bool check_point_belongs(const std::vector<g_obj::point_t> &inter_points, const g_obj::point_t &point) {
+        if (inter_points.size() == 1) {
+            std::cerr << "ERROR: incorrect number of points of intersection" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        g_obj::line_segment section{inter_points[0], inter_points[1]};
+        float len_section = section.len();
+
+        if (point.distance(inter_points[0]) <= len_section &&
+            point.distance(inter_points[1]) <= len_section)
+            return true;
+        return false;
+    }
+
     //-------------------------------------
     // vector_t
     //-------------------------------------
@@ -46,7 +62,7 @@ namespace g_obj {
                 std::abs(z - another.z) < flt_tolerance);
     }
 
-    bool vector_t::parallelism(const vector_t &another) const {
+    bool vector_t::ortogonality(const vector_t &another) const {
         assert(valid() && another.valid());
         return equal_null(scalar_mult(another, *this));
     }
@@ -122,6 +138,7 @@ namespace g_obj {
                equal_null((point.y - point_.y)/vec_.y - (point.z - point_.z)/vec_.z);
     }
 
+    //return non-valid point if laines are parallel
     point_t line_t::point_of_intersect(const line_t &another) const {
         point_t ret;
 
@@ -159,6 +176,24 @@ namespace g_obj {
             p1.y*((p1.x-p2.x)*(p2.z-p3.z) - (p2.x-p3.x)*(p1.z-p2.z)) +
             p1.z*((p1.y-p2.y)*(p2.x-p3.x) - (p2.y-p3.y)*(p1.x-p2.x));
     } 
+
+    bool plane_t::parallelism(const plane_t &another) const {
+        assert(valid() && another.valid());
+        return vect_mult(get_normal(), another.get_normal()).equal({0, 0, 0});
+    }
+
+    bool plane_t::equal_parallel(const plane_t &another) const {
+        assert(valid() && another.valid());
+        if (parallelism(another) && d!=0) {
+            if (a != 0) {
+                if (equal_null(another.a/a - another.d/d)) return true; else return false; }
+            else if (b != 0) {
+                if (equal_null(another.b/b - another.d/d)) return true; else return false; }
+            else if (c != 0) {
+                if (equal_null(another.c/c - another.d/d)) return true; else return false; }
+        }
+        return false;
+    }
 
     vector_t plane_t::get_normal() const {
         assert(valid());
@@ -216,6 +251,89 @@ namespace g_obj {
             std::cout << "true" << std::endl;
         else 
             std::cout << "false" << std::endl;
+    }
+
+    std::vector<g_obj::point_t> triangle_t::find_inter_points(const g_obj::line_t &inter_line) const {
+
+        std::vector<g_obj::point_t> inter_points(2);
+        int count_inters{0};
+
+        for (int i = 0; i < 3 && count_inters < 2; i++) {
+            g_obj::line_t line = lines[i];
+            if (plane.get_normal(line).ortogonality(inter_line.vec_)) { //check for parallel between side and inter_line
+                if (inter_line.point_belong(vertices[i]) &&
+                    inter_line.point_belong(vertices[(i+1)%3])) {
+                    inter_points[0] = vertices[i]; inter_points[1] = vertices[(i+1)%3];
+                    count_inters = 2;
+                    break;
+                }
+            }
+            else {   //if intersections
+                g_obj::point_t intersec_point = inter_line.point_of_intersect(lines[i]);
+                if (check_point_belongs({vertices[i], vertices[(i+1)%3]}, intersec_point)) {
+                    inter_points[count_inters] = intersec_point;
+                    count_inters++;
+                }
+                if (count_inters == 2) break;
+            }
+        }
+
+        if (inter_points.size() == 1) {
+            std::cerr << "ERROR: incorrect number of points of intersection" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        return inter_points;
+    }
+
+    bool triangle_t::check_tr_inter(const g_obj::triangle_t &tr2) const {
+    
+        //here checking for parallelism of planes...
+        if (plane.parallelism(tr2.plane)) {
+            if (plane.equal_parallel(tr2.plane)) {  //if planes are same
+                for (int i = 0; i < 3; i++) {
+                    line_t line_side = lines[i];
+                    point_t p_inter;
+                    for (int j = 0; j < 3; j++) {
+                        p_inter = line_side.point_of_intersect(tr2.lines[j]);
+                        if (!p_inter.valid())
+                            continue;
+                        if (check_point_belongs({vertices[i], vertices[(i+1)%3]}, p_inter))
+                            return true;
+                    }
+                }
+                return false;
+            } else return false; //different parallel planes
+        }
+
+        g_obj::line_t inter_line = plane.line_of_intersect(tr2.plane);
+        
+        std::vector<g_obj::point_t> inter_points1(2), inter_points2(2);
+
+        inter_points1 = find_inter_points(inter_line); //0 or 2 points
+        inter_points2 = tr2.find_inter_points(inter_line); //0 or 2 points
+
+        if (!(inter_points1[0].valid()) || !(inter_points2[0].valid()))
+            return false;
+
+        if (inter_points1[0].equal(inter_points1[1])) {
+            if (inter_points2[0].equal(inter_points2[1])) {
+                if (inter_points1[0].equal(inter_points2[0]))
+                    return true;
+                else return false;
+            }
+            else if (check_point_belongs(inter_points2, inter_points1[0]))
+                return true;
+            else return false;
+        }
+
+        for (int i = 0; i < 2; i++) {
+            if (check_point_belongs(inter_points1, inter_points2[i]))
+                return true;
+            else return false;        
+        }
+
+        return false;
     }
 
 } // namespace g_obj

@@ -1,7 +1,5 @@
 #include "geom_obj.hpp"
 
-#define TEST_INTER_PLANES 0
-
 g_obj::triangle_t get_triangle() {
     std::vector<g_obj::point_t> verts(3);
     g_obj::point_t temp;
@@ -25,88 +23,7 @@ g_obj::triangle_t get_triangle() {
     }
 
     g_obj::triangle_t ret{verts, plane_, line_arr};
-    //ret.print();
     return ret;
-}
-
-bool check_point_belongs(const std::vector<g_obj::point_t> &inter_points, const g_obj::point_t &point) {
-    if (inter_points.size() == 1) {
-        std::cerr << "ERROR: incorrect number of points of intersection" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    g_obj::line_segment section{inter_points[0], inter_points[1]};
-    float len_section = section.len();
-    if (point.distance(inter_points[0]) <= len_section &&
-        point.distance(inter_points[1]) <= len_section)
-        return true;
-    return false;
-}
-
-std::vector<g_obj::point_t> find_inter_points(const g_obj::triangle_t &tr,
-                                              const g_obj::line_t &inter_line) {
-
-    std::vector<g_obj::point_t> inter_points(2);
-    int count_inters{0};
-
-    for (int i = 0; i < 3 && count_inters < 2; i++) {
-        //if (inter_line.parallelism(tr.lines[i])) {            //if lines are parallel
-        g_obj::line_t line = tr.lines[i];
-        if (tr.plane.get_normal(line).parallelism(inter_line.vec_)) {
-            if (inter_line.point_belong(tr.vertices[i]) &&
-                inter_line.point_belong(tr.vertices[(i+1)%3])) {
-                inter_points[0] = tr.vertices[i]; inter_points[1] = tr.vertices[(i+1)%3];
-                count_inters = 2;
-                break;
-            }
-        }
-        else {   //if intersections
-            g_obj::point_t intersec_point = inter_line.point_of_intersect(tr.lines[i]);
-            if (check_point_belongs({tr.vertices[i], tr.vertices[(i+1)%3]}, intersec_point)) {
-                inter_points[count_inters] = intersec_point;
-                count_inters++;
-            }
-            if (count_inters == 2) break;
-        }
-    }
-
-    if (inter_points.size() == 1) {
-        std::cerr << "ERROR: incorrect number of points of intersection" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    return inter_points;
-}
-
-bool check_tr_inter(const g_obj::triangle_t &tr1, const g_obj::triangle_t &tr2) {
-    g_obj::line_t inter_line = tr1.plane.line_of_intersect(tr2.plane);
-    
-    std::vector<g_obj::point_t> inter_points1(2), inter_points2(2);
-
-    inter_points1 = find_inter_points(tr1, inter_line); //0 or 2 points
-    inter_points2 = find_inter_points(tr2, inter_line); //0 or 2 points
-
-    if (!(inter_points1[0].valid()) || !(inter_points2[0].valid()))
-        return false;
-
-    if (inter_points1[0].equal(inter_points1[1])) {
-        if (inter_points2[0].equal(inter_points2[1])) {
-            if (inter_points1[0].equal(inter_points2[0]))
-                return true;
-            else return false;
-        }
-        else if (check_point_belongs(inter_points2, inter_points1[0]))
-            return true;
-        else return false;
-    }
-
-    for (int i = 0; i < 2; i++) {
-        if (check_point_belongs(inter_points1, inter_points2[i]))
-            return true;
-        else return false;        
-    }
-
-    return false;
 }
 
 int main(int argc, char** argv) 
@@ -127,8 +44,10 @@ int main(int argc, char** argv)
         if (triangles[i].inter) {
             continue;
         } else {
-            for (int j = i + 1; j < N; j++) {
-                if (check_tr_inter(triangles[i], triangles[j])) {
+            for (int j = 0; j < N; j++) {
+                if (i == j)
+                    continue;
+                if ((triangles[i].check_tr_inter(triangles[j]))) {
                     triangles[i].inter = true;
                     triangles[j].inter = true;
                 }
@@ -140,43 +59,6 @@ int main(int argc, char** argv)
         if (triangles[i].inter == true)
             std::cout << i << std::endl;
     }
-    
-    #if TEST_INTER_PLANES
-    point_t  p1, p2, p3;
-    point_t  p4, p5, p6;
-
-    std::cin >> p1.x;
-    std::cin >> p1.y;
-    std::cin >> p1.z;
-
-    std::cin >> p2.x;
-    std::cin >> p2.y;
-    std::cin >> p2.z;
-
-    std::cin >> p3.x;
-    std::cin >> p3.y;
-    std::cin >> p3.z;
-
-    std::cin >> p4.x;
-    std::cin >> p4.y;
-    std::cin >> p4.z;
-
-    std::cin >> p5.x;
-    std::cin >> p5.y;
-    std::cin >> p5.z;
-
-    std::cin >> p6.x;
-    std::cin >> p6.y;
-    std::cin >> p6.z;
-
-    plane_t pl1{p1, p2, p3}, pl2{p4, p5, p6};
-
-    pl1.get_normal().print();
-    pl2.get_normal().print();
-
-    pl1.line_of_intersect(pl2).print();
-
-    #endif
 
     return 0;
 }
