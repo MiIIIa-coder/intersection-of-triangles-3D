@@ -1,4 +1,0 @@
-/mnt/c/cpp/C++_course/intersection-of-triangles-3D/build/CMakeFiles/rebuild_cache.dir
-/mnt/c/cpp/C++_course/intersection-of-triangles-3D/build/CMakeFiles/edit_cache.dir
-/mnt/c/cpp/C++_course/intersection-of-triangles-3D/build/CMakeFiles/triangle_intersec.dir
-/mnt/c/cpp/C++_course/intersection-of-triangles-3D/build/CMakeFiles/geom_obj.dir

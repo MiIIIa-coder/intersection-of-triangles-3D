@@ -1,1 +1,0 @@
-/usr/bin/c++     CMakeFiles/triangle_intersec.dir/triangle.cpp.o  -o triangle_intersec  libgeom_obj.a 
