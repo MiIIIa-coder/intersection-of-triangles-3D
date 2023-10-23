@@ -1,0 +1,2 @@
+/usr/bin/ar qc libgeom_obj.a  CMakeFiles/geom_obj.dir/geom_obj.cpp.o
+/usr/bin/ranlib libgeom_obj.a

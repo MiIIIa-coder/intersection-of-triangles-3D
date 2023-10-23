@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/mnt/c/cpp/C++_course/intersection-of-triangles-3D/geom_obj.hpp
+iostream
+-
+cmath
+-
+cassert
+-
+vector
+-
+stdlib.h
+-
+
+/mnt/c/cpp/C++_course/intersection-of-triangles-3D/triangle.cpp
+geom_obj.hpp
+/mnt/c/cpp/C++_course/intersection-of-triangles-3D/geom_obj.hpp
+

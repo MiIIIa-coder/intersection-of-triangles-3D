@@ -7,7 +7,6 @@
 #include <stdlib.h>
 
 #define flt_tolerance 0.00001
-#define inter_vol_width 100
 
 bool equal_null(float x);
 
@@ -62,7 +61,7 @@ namespace g_obj {
     //-------------------------------------
     struct  line_t {
         point_t  point_;
-        vector_t vec_;  //point - (0;0;0) <=> vector
+        vector_t vec_;
 
         line_t() {
             point_ = {0.0, 0.0, 0.0};
@@ -101,7 +100,7 @@ namespace g_obj {
     };
 
     //-------------------------------------
-    // plane (ax+by+cz+d=0)
+    // plane_t (ax+by+cz+d=0)
     //-------------------------------------
     struct plane_t {
         float a, b ,c ,d;
@@ -123,7 +122,7 @@ namespace g_obj {
     };
 
     //-------------------------------------
-    // triangle_t (three points)
+    // triangle_t (three points, lines, plane)
     //-------------------------------------
     struct triangle_t {
         std::vector<point_t> vertices;
