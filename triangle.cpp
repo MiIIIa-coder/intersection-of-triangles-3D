@@ -41,7 +41,6 @@ int main(int argc, char** argv)
     }
 
     for (int i = 0; i < N; i++) {
-        std::cout << i << std::endl;
         if (triangles[i].inter) {
             continue;
         } else {
@@ -51,6 +50,7 @@ int main(int argc, char** argv)
                 if ((triangles[i].check_tr_inter(triangles[j]))) {
                     triangles[i].inter = true;
                     triangles[j].inter = true;
+                    break;
                 }
             }
         }
