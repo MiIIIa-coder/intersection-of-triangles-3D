@@ -41,6 +41,7 @@ int main(int argc, char** argv)
     }
 
     for (int i = 0; i < N; i++) {
+        std::cout << i << std::endl;
         if (triangles[i].inter) {
             continue;
         } else {
