@@ -287,6 +287,49 @@ namespace g_obj {
     }
 
     bool triangle_t::check_tr_inter(const g_obj::triangle_t &tr2) const {
+
+        //triangles are 2 points
+        if (type == POINT && tr2.type == POINT) {
+            if (vertices[0].equal(tr2.vertices[0]))
+                return true;
+            else return false;
+        }
+
+        //triangles are 2 segments
+        if (type == SEGMENT && tr2.type == SEGMENT) {
+            line_t line1, line2;
+            point_t p1, p2, tr2_p1, tr2_p2;            //p1 != p2 
+            line_segment segment1, segment2;
+            for (int i = 0; i < 3; i++) {
+                if (lines[i].vec_.equal({0, 0, 0})) {  //point[i] == point[i+1]
+                    line1 = lines[(i+1)%3];
+                    p1 = vertices[(i+1)%3];
+                    p2 = vertices[(i+2)%3];
+                    segment1 = {p1, p2};
+                }
+            }
+            for (int i = 0; i < 3; i++) {
+                if (tr2.lines[i].vec_.equal({0, 0, 0})) {  //point[i] == point[i+1]
+                    line1 = lines[(i+1)%3];
+                    tr2_p1 = tr2.vertices[(i+1)%3];
+                    tr2_p2 = tr2.vertices[(i+2)%3];
+                    segment2 = {tr2_p1, tr2_p2};
+                }
+            }
+
+            point_t point_inter;
+            int len_s1, len_s2;
+            len_s1 = segment1.len();
+            len_s2 = segment2.len();
+            point_inter = line1.point_of_intersect(line2);
+            if ((len_s1 - point_inter.distance(p1) >= flt_tolerance) &&
+                (len_s1 - point_inter.distance(p2) >= flt_tolerance) &&
+                (len_s2 - point_inter.distance(tr2_p1) >= flt_tolerance) &&
+                (len_s2 - point_inter.distance(tr2_p2) >= flt_tolerance))
+                    return true;
+            else return false;
+
+        }
     
         //here checking for parallelism of planes...
         if (plane.parallelism(tr2.plane)) {

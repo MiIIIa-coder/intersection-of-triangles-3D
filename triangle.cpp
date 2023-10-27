@@ -11,6 +11,16 @@ g_obj::triangle_t get_triangle() {
         assert(std::cin.good());
     }
 
+    g_obj::type_obj type;
+    if (verts[0].equal(verts[1]) && verts[1].equal(verts[2])) 
+        type = g_obj::POINT;
+    else if ((verts[0].equal(verts[1]) && !(verts[0].equal(verts[2]))) ||
+             (verts[0].equal(verts[2]) && !(verts[0].equal(verts[1]))) ||
+             (verts[1].equal(verts[2]) && !(verts[1].equal(verts[0])))  ) {
+                type = g_obj::SEGMENT;
+             }
+    else type = g_obj::TRIANGLE;
+
     g_obj::plane_t plane_{verts[0], verts[1], verts[2]};
 
     std::vector<g_obj::line_segment> section_arr(3);
@@ -22,7 +32,7 @@ g_obj::triangle_t get_triangle() {
         line_arr[i] = section_arr[i].get_line();
     }
 
-    g_obj::triangle_t ret{verts, plane_, line_arr};
+    g_obj::triangle_t ret{type, verts, plane_, line_arr};
     return ret;
 }
 

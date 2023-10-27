@@ -12,6 +12,8 @@ bool equal_null(float x);
 
 namespace g_obj {
 
+    enum type_obj {POINT, SEGMENT, TRIANGLE};
+
     //-------------------------------------
     // vector_t
     //-------------------------------------
@@ -125,6 +127,7 @@ namespace g_obj {
     // triangle_t (three points, lines, plane)
     //-------------------------------------
     struct triangle_t {
+        type_obj type;
         std::vector<point_t> vertices;
         plane_t plane;
         std::vector<line_t> lines;
