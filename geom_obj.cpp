@@ -22,6 +22,10 @@ namespace g_obj {
         return ret;
     }
 
+    float tr_square(const point_t &p1, const point_t &p2, const point_t &p3) {
+        return vect_mult(p2-p1, p3-p1).get_len()*0.5;
+    }
+
     //check for belonging point to segment of inter_points
     bool check_point_belongs(const std::vector<g_obj::point_t> &inter_points, const g_obj::point_t &point) {
         if (inter_points.size() == 1) {
@@ -90,6 +94,21 @@ namespace g_obj {
         assert(p1_.valid() && p2_.valid());
         line_t ret(p1_, p2_ - p1_);
         return ret;
+    }
+
+    bool line_segment::point_belong(const point_t &point) const {
+        int length;
+        line_t line;
+
+        length = len();
+        line = get_line();
+        if (line.point_belong(point)) {
+            if ((length - point.distance(p1_) >= flt_tolerance) &&
+                (length - point.distance(p2_) >= flt_tolerance))
+                    return true;
+        }
+
+        return false;
     }
 
     //-------------------------------------
@@ -193,6 +212,10 @@ namespace g_obj {
                 if (equal_null(another.c/c - another.d/d)) return true; else return false; }
         }
         return false;
+    }
+
+    bool plane_t::point_belong(const point_t &point) const {
+        return equal_null(a*point.x + b*point.y + c*point.z + d);
     }
 
     vector_t plane_t::get_normal() const {
@@ -310,7 +333,7 @@ namespace g_obj {
             }
             for (int i = 0; i < 3; i++) {
                 if (tr2.lines[i].vec_.equal({0, 0, 0})) {  //point[i] == point[i+1]
-                    line1 = lines[(i+1)%3];
+                    line2 = tr2.lines[(i+1)%3];
                     tr2_p1 = tr2.vertices[(i+1)%3];
                     tr2_p2 = tr2.vertices[(i+2)%3];
                     segment2 = {tr2_p1, tr2_p2};
@@ -330,6 +353,66 @@ namespace g_obj {
             else return false;
 
         }
+
+        //triangles are point and segment
+        if (type == POINT && tr2.type == SEGMENT) {
+            point_t tr2_p1, tr2_p2;
+            line_segment segment2;
+            for (int i = 0; i < 3; i++) {
+                if (tr2.lines[i].vec_.equal({0, 0, 0})) {  //point[i] == point[i+1]
+                    tr2_p1 = tr2.vertices[(i+1)%3];
+                    tr2_p2 = tr2.vertices[(i+2)%3];
+                    segment2 = {tr2_p1, tr2_p2};
+                }
+            }
+            if (segment2.point_belong(vertices[0]))
+                return true;
+            return false;
+        } else if (type == SEGMENT && tr2.type == POINT) {
+            point_t p1, p2;
+            line_segment segment1;
+            for (int i = 0; i < 3; i++) {
+                if (lines[i].vec_.equal({0, 0, 0})) {
+                    p1 = vertices[(i+1)%3];
+                    p2 = vertices[(i+2)%3];
+                    segment1 = {p1, p2};
+                }
+            }
+            if (segment1.point_belong(tr2.vertices[0]))
+                return true;
+            return false;
+        }
+
+        //triangle and point
+        if (type == TRIANGLE && tr2.type == POINT) {
+            float s0, s;
+
+            if (!(plane.point_belong(tr2.vertices[0])))
+                return false;
+            s = 0;
+            s0 = tr_square(vertices[0], vertices[1], vertices[2]);
+            for (int i = 0; i < 3; i++) {
+                s += tr_square(tr2.vertices[0], vertices[i], vertices[(i+1)%3]);
+            }
+            if (equal_null(s0 - s))
+                return true;
+            return false;
+        } else if (type == POINT && tr2.type == TRIANGLE) {
+            float s0, s;
+
+            if (!(plane.point_belong(tr2.vertices[0])))
+                return false;
+            s = 0;
+            s0 = tr_square(tr2.vertices[0], tr2.vertices[1], tr2.vertices[2]);
+            for (int i = 0; i < 3; i++) {
+                s += tr_square(vertices[0], tr2.vertices[i], tr2.vertices[(i+1)%3]);
+            }
+            if (equal_null(s0 - s))
+                return true;
+            return false;
+        }
+
+        //triangle and segment - ?? DO IT
     
         //here checking for parallelism of planes...
         if (plane.parallelism(tr2.plane)) {

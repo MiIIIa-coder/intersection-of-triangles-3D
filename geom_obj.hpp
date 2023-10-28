@@ -25,6 +25,7 @@ namespace g_obj {
         bool valid() const { return !(x != x || y!= y || z!=z); }
         bool equal(const vector_t &another) const;
         bool ortogonality(const vector_t &another) const;
+        float get_len() const { return sqrt(x*x + y*y + z*z); }
         vector_t operator-(const vector_t &another) const {
             return {x - another.x, y - another.y, z - another.z};
         }
@@ -99,6 +100,7 @@ namespace g_obj {
 
         float len() const;
         line_t get_line() const;  //where line_segment lives
+        bool point_belong(const point_t &point) const;
     };
 
     //-------------------------------------
@@ -118,6 +120,7 @@ namespace g_obj {
                              else std::cout << "non-valid data of plane" << std::endl;}
         bool parallelism(const plane_t &another) const;
         bool equal_parallel(const plane_t &another) const;
+        bool point_belong(const point_t &point) const;
         vector_t get_normal() const;              //normal of this plane
         vector_t get_normal(line_t &line) const;  //normal of line (normal in plane)
         line_t line_of_intersect(const plane_t &another) const;
@@ -141,6 +144,7 @@ namespace g_obj {
     float det(float a, float b, float c, float d);
     float scalar_mult(const vector_t &vect1, const vector_t &vect2);
     vector_t vect_mult(const vector_t &vect1, const vector_t &vect2);
+    float tr_square(point_t &p1, point_t &p2, point_t &p3);
     
 }
 
