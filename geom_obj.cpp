@@ -201,6 +201,7 @@ namespace g_obj {
         return vect_mult(get_normal(), another.get_normal()).equal({0, 0, 0});
     }
 
+    //return true if parallel planes are equal
     bool plane_t::equal_parallel(const plane_t &another) const {
         assert(valid() && another.valid());
         if (parallelism(another) && d!=0) {
@@ -250,6 +251,21 @@ namespace g_obj {
         inter_p.x = det1/det0; inter_p.y = det2/det0; inter_p.z = 0;
 
         return {inter_p, inter_v};
+    }
+
+    //if line and plane are parallel return non-valid
+    point_t plane_t::point_of_intersect(const line_t &line) const {
+        assert(line.vec_.valid() && line.point_.valid());
+        point_t point;
+        float scalar_mult_res;
+        scalar_mult_res = scalar_mult(get_normal(), line.vec_);
+        if (equal_null(scalar_mult_res)) {
+            return point;
+        }
+        float k = (a*line.point_.x + b*line.point_.y + c*line.point_.z + d)/scalar_mult_res;
+        return {line.point_.x - line.vec_.x*k,
+                line.point_.y - line.vec_.y*k,
+                line.point_.z - line.vec_.z*k};
     }
 
     //-------------------------------------
@@ -412,8 +428,64 @@ namespace g_obj {
             return false;
         }
 
-        //triangle and segment - ?? DO IT
-    
+        //triangle and segment
+        if (type == TRIANGLE && tr2.type == SEGMENT) {
+            line_t line;
+            point_t p1, p2, point;
+            line_segment segment1;
+            for (int i = 0; i < 3; i++) {
+                if (lines[i].vec_.equal({0, 0, 0})) {
+                    p1 = vertices[(i+1)%3];
+                    p2 = vertices[(i+2)%3];
+                    segment1 = {p1, p2};
+                }
+            }
+            line = segment1.get_line();
+            point = plane.point_of_intersect(line);
+            if (!(point.valid()))
+                return false;
+            if (!(segment1.point_belong(point)))
+                return false;
+            float s0, s;
+
+            s = 0;
+            s0 = tr_square(vertices[0], vertices[1], vertices[2]);
+            for (int i = 0; i < 3; i++) {
+                s += tr_square(point, vertices[i], vertices[(i+1)%3]);
+            }
+            if (equal_null(s0 - s))
+                return true;
+            return false;
+        } else if (type == SEGMENT && tr2.type == TRIANGLE) {
+            line_t line;
+            point_t tr2_p1, tr2_p2, point;
+            line_segment segment2;
+            for (int i = 0; i < 3; i++) {
+                if (tr2.lines[i].vec_.equal({0, 0, 0})) {
+                    tr2_p1 = tr2.vertices[(i+1)%3];
+                    tr2_p2 = tr2.vertices[(i+2)%3];
+                    segment2 = {tr2_p1, tr2_p2};
+                }
+            }
+            line = segment2.get_line();
+            point = tr2.plane.point_of_intersect(line);
+            if (!(point.valid()))
+                return false;
+            if (!(segment2.point_belong(point)))
+                return false;
+            float s0, s;
+
+            s = 0;
+            s0 = tr_square(tr2.vertices[0], tr2.vertices[1], tr2.vertices[2]);
+            for (int i = 0; i < 3; i++) {
+                s += tr_square(point, tr2.vertices[i], tr2.vertices[(i+1)%3]);
+            }
+            if (equal_null(s0 - s))
+                return true;
+            return false;
+        }
+
+        //2 triangles
         //here checking for parallelism of planes...
         if (plane.parallelism(tr2.plane)) {
             if (plane.equal_parallel(tr2.plane)) {  //if planes are same

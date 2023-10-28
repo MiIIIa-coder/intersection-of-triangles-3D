@@ -123,6 +123,7 @@ namespace g_obj {
         bool point_belong(const point_t &point) const;
         vector_t get_normal() const;              //normal of this plane
         vector_t get_normal(line_t &line) const;  //normal of line (normal in plane)
+        point_t point_of_intersect(const line_t &line) const;
         line_t line_of_intersect(const plane_t &another) const;
     };
 
