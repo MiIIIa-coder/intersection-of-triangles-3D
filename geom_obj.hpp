@@ -10,6 +10,11 @@
 
 bool equal_null(float x);
 
+//A1*x + B1*y = D1
+//A2*x + B2*y = D2
+std::vector<float> solve_alg_sys_2(float A1, float B1, float D1,
+                                   float A2, float B2, float D2);
+
 namespace g_obj {
 
     enum type_obj {POINT, SEGMENT, TRIANGLE};

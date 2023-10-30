@@ -4,6 +4,21 @@ bool equal_null(float x) {
     return std::abs(x) <= flt_tolerance;
 }
 
+//A1*x + B1*y = D1
+//A2*x + B2*y = D2
+std::vector<float> solve_alg_sys_2(float A1, float B1, float D1,
+                                   float A2, float B2, float D2) {
+    std::vector<float> ans(2);
+    float det0 = g_obj::det(A1, B1, A2, B2);
+    assert(!equal_null(det0));
+    float det1 = g_obj::det(D1, B1, D2, B2);
+    float det2 = g_obj::det(A1, D1, A2, D2);
+    ans[0] = det1/det0;
+    ans[1] = det2/det0;
+
+    return ans;
+}
+
 namespace g_obj {
 
     float det(float a, float b, float c, float d) {
@@ -244,11 +259,19 @@ namespace g_obj {
         }
 
         //find point inter_p in line_of_intersect (z = 0)
-        float det0 = det(a, b, another.a, another.b);
-        float det1 = det(-d, b, -another.d, another.b);
-        float det2 = det(a, -d, another.a, -another.d);
+        std::vector<float> ans_sys(2);
         point_t inter_p;
-        inter_p.x = det1/det0; inter_p.y = det2/det0; inter_p.z = 0;
+
+        if (!equal_null(det(a, b, another.a, another.b))) { //z = 0 
+            ans_sys = solve_alg_sys_2(a, b, -d, another.a, another.b, -another.d);
+            inter_p.x = ans_sys[0]; inter_p.y = ans_sys[1]; inter_p.z = 0;
+        } else if (!equal_null(det(a, c, another.a, another.c))) { //y = 0
+            ans_sys = solve_alg_sys_2(a, c, -d, another.a, another.c, -another.d);
+            inter_p.x = ans_sys[0]; inter_p.y = 0; inter_p.z = ans_sys[1];
+        } else if (!equal_null(det(b, c, another.b, another.c))) { //x = 0
+            ans_sys = solve_alg_sys_2(b, c, -d, another.b, another.c, -another.d);
+            inter_p.x = 0; inter_p.y = ans_sys[0]; inter_p.z = ans_sys[1];
+        } 
 
         return {inter_p, inter_v};
     }
