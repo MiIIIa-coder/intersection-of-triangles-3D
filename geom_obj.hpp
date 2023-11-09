@@ -143,7 +143,10 @@ namespace g_obj {
         bool inter {false};
 
         void print() const;
+        float square() const;
         std::vector<g_obj::point_t> find_inter_points(const g_obj::line_t &inter_line) const;
+        bool point_in_tr(const point_t &point) const;
+        bool tr_in_tr(const triangle_t &triangle) const; //chech triangle inside another triangle
         bool check_tr_inter(const g_obj::triangle_t &tr2) const;
     };
 
@@ -151,7 +154,7 @@ namespace g_obj {
     float scalar_mult(const vector_t &vect1, const vector_t &vect2);
     vector_t vect_mult(const vector_t &vect1, const vector_t &vect2);
     float tr_square(point_t &p1, point_t &p2, point_t &p3);
-    
+
 }
 
 #endif

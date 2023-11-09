@@ -38,7 +38,7 @@ namespace g_obj {
     }
 
     float tr_square(const point_t &p1, const point_t &p2, const point_t &p3) {
-        return vect_mult(p2-p1, p3-p1).get_len()*0.5;
+        return vect_mult(p2-p1, p3-p1).get_len() * 0.5;
     }
 
     //check for belonging point to segment of inter_points
@@ -220,13 +220,14 @@ namespace g_obj {
     bool plane_t::equal_parallel(const plane_t &another) const {
         assert(valid() && another.valid());
         if (parallelism(another) && d!=0) {
-            if (a != 0) {
+            if (!equal_null(a)) {
                 if (equal_null(another.a/a - another.d/d)) return true; else return false; }
-            else if (b != 0) {
+            else if (!equal_null(b)) {
                 if (equal_null(another.b/b - another.d/d)) return true; else return false; }
-            else if (c != 0) {
+            else if (!equal_null(c)) {
                 if (equal_null(another.c/c - another.d/d)) return true; else return false; }
-        }
+        } else if (equal_null(d) && equal_null(another.d)) return true;
+
         return false;
     }
 
@@ -315,6 +316,11 @@ namespace g_obj {
             std::cout << "false" << std::endl;
     }
 
+    float triangle_t::square() const {
+        return vect_mult(vertices[1] - vertices[0],
+                         vertices[2] - vertices[0]).get_len() * 0.5;
+    }
+
     std::vector<g_obj::point_t> triangle_t::find_inter_points(const g_obj::line_t &inter_line) const {
 
         std::vector<g_obj::point_t> inter_points(2);
@@ -346,6 +352,34 @@ namespace g_obj {
         }
 
         return inter_points;
+    }
+
+    bool triangle_t::point_in_tr(const point_t &point) const {
+        float s0, s;
+
+        if (!(plane.point_belong(point)))
+            return false;
+        s = 0;
+        s0 = square();
+        for (int i = 0; i < 3; i++) {
+            s += tr_square(point, vertices[i], vertices[(i+1)%3]);
+        }
+        if (equal_null(s0 - s))
+            return true;
+        return false;
+    }
+
+    bool triangle_t::tr_in_tr(const triangle_t &triangle) const {
+        if (point_in_tr(triangle.vertices[0]) &&
+            point_in_tr(triangle.vertices[1]) &&
+            point_in_tr(triangle.vertices[2])  )
+            return true; else return false;
+        if (triangle.point_in_tr(vertices[0]) &&
+            triangle.point_in_tr(vertices[1]) &&
+            triangle.point_in_tr(vertices[2])  )
+            return true; else return false;
+
+        return false;
     }
 
     bool triangle_t::check_tr_inter(const g_obj::triangle_t &tr2) const {
@@ -424,35 +458,20 @@ namespace g_obj {
 
         //triangle and point
         if (type == TRIANGLE && tr2.type == POINT) {
-            float s0, s;
-
-            if (!(plane.point_belong(tr2.vertices[0])))
-                return false;
-            s = 0;
-            s0 = tr_square(vertices[0], vertices[1], vertices[2]);
-            for (int i = 0; i < 3; i++) {
-                s += tr_square(tr2.vertices[0], vertices[i], vertices[(i+1)%3]);
-            }
-            if (equal_null(s0 - s))
-                return true;
-            return false;
+            if (point_in_tr(tr2.vertices[0])) 
+                return true; else return false;
         } else if (type == POINT && tr2.type == TRIANGLE) {
-            float s0, s;
-
-            if (!(plane.point_belong(tr2.vertices[0])))
-                return false;
-            s = 0;
-            s0 = tr_square(tr2.vertices[0], tr2.vertices[1], tr2.vertices[2]);
-            for (int i = 0; i < 3; i++) {
-                s += tr_square(vertices[0], tr2.vertices[i], tr2.vertices[(i+1)%3]);
-            }
-            if (equal_null(s0 - s))
-                return true;
-            return false;
+            if (tr2.point_in_tr(vertices[0])) 
+                return true; else return false;
         }
 
         //triangle and segment
         if (type == TRIANGLE && tr2.type == SEGMENT) {
+            if (point_in_tr(tr2.vertices[0]) &&
+                point_in_tr(tr2.vertices[1]) &&
+                point_in_tr(tr2.vertices[2])   )
+                return true; else return false;
+
             line_t line;
             point_t p1, p2, point;
             line_segment segment1;
@@ -480,6 +499,11 @@ namespace g_obj {
                 return true;
             return false;
         } else if (type == SEGMENT && tr2.type == TRIANGLE) {
+            if (tr2.point_in_tr(vertices[0]) &&
+                tr2.point_in_tr(vertices[1]) &&
+                tr2.point_in_tr(vertices[2])   )
+                return true; else return false;
+
             line_t line;
             point_t tr2_p1, tr2_p2, point;
             line_segment segment2;
@@ -512,6 +536,10 @@ namespace g_obj {
         //here checking for parallelism of planes...
         if (plane.parallelism(tr2.plane)) {
             if (plane.equal_parallel(tr2.plane)) {  //if planes are same
+
+                if (tr_in_tr(tr2)) return true; else return false; //if triangle in another triangle
+
+
                 for (int i = 0; i < 3; i++) {
                     line_t line_side = lines[i];
                     point_t p_inter;
