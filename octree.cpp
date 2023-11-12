@@ -111,4 +111,63 @@ namespace octree {
         }
         
     }
+
+    std::list<g_obj::triangle_t> ocTree::get_inter(std::list<g_obj::triangle_t> &parent_l_obj) {
+        std::list<g_obj::triangle_t> intersections;
+
+        std::list<g_obj::triangle_t>::iterator it, it_local;
+        for (it = parent_l_obj.begin(); it != parent_l_obj.end(); it++) {
+            for (it_local = list_obj.begin(); it_local != list_obj.end(); it_local++) {
+                if (it_local->check_tr_inter(*it)) {
+                    if (it->inter == false) {
+                        it->inter = true;
+                        intersections.push_back(*it);
+                    }
+                    if (it_local->inter == false) {
+                        it_local->inter = true;
+                        intersections.push_back(*it_local);
+                    }
+                }
+            }
+        }
+
+        //check inters between local triangles
+        if (list_obj.size() > 1) {
+            std::list<g_obj::triangle_t> tmp;
+            tmp = list_obj;  //may be disaster
+            while (tmp.size() > 0) {
+                for (it = tmp.begin(); it != tmp.end(); it++) {
+                    if (tmp.back() == *it) continue;
+                    if (tmp.back().check_tr_inter(*it)) {
+                        if (it->inter == false) {
+                        it->inter = true;
+                        intersections.push_back(*it);
+                    }
+                    if (tmp.back().inter == false) {
+                        tmp.back().inter = true;
+                        intersections.push_back(tmp.back());
+                    }
+                    }
+                }
+                tmp.remove(tmp.back()); 
+            }
+        }
+
+        //update parent's list with new obj and move it to the next level
+        for (it = list_obj.begin(); it != list_obj.end(); it++) {
+            parent_l_obj.push_back(*it);
+        }
+
+        int index = 0;
+        for (int flags = (int)m_activeNodes; flags > 0; flags >>= 1, index++)  //maybe problem with byte->int
+            if ((flags & 1) == 1) {
+                auto tmp = child_node[index]->get_inter(parent_l_obj);
+                for (it = tmp.begin(); it != tmp.end(); it++)
+                    intersections.push_back(*it);
+            }
+                
+        return intersections;
+
+    }
+
 }

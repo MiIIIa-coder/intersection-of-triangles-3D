@@ -41,6 +41,7 @@ namespace octree
     private:
         ocTree *create_node(boundingBox &region, std::list<g_obj::triangle_t> &List);
         void build_tree();
+        std::list<g_obj::triangle_t> get_inter(std::list<g_obj::triangle_t> &parent_l_obj);
 
     };
     
