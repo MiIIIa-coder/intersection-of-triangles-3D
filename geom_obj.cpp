@@ -95,6 +95,14 @@ namespace g_obj {
                     (z - another.z)*(z - another.z));
     }
 
+    bool point_t::operator==(const point_t &point) const { 
+            if (equal_null(x - point.x) &&
+                equal_null(y - point.y) &&
+                equal_null(z - point.z)  )
+                return true;
+            return false;
+        }
+
     //-------------------------------------
     // line_segment (two points)
     //-------------------------------------
@@ -373,11 +381,22 @@ namespace g_obj {
         if (point_in_tr(triangle.vertices[0]) &&
             point_in_tr(triangle.vertices[1]) &&
             point_in_tr(triangle.vertices[2])  )
-            return true; else return false;
-        if (triangle.point_in_tr(vertices[0]) &&
+            return true; 
+        else if (triangle.point_in_tr(vertices[0]) &&
             triangle.point_in_tr(vertices[1]) &&
             triangle.point_in_tr(vertices[2])  )
-            return true; else return false;
+            return true;
+
+        return false;
+    }
+
+    bool triangle_t::operator==(const triangle_t &triangle) const {
+        for (int i = 0; i < 3; i++) {
+            if (vertices[(0 + i)%3] == triangle.vertices[0] &&
+                vertices[(1 + i)%3] == triangle.vertices[1] &&
+                vertices[(2 + i)%3] == triangle.vertices[2]  )
+                return true;
+        }
 
         return false;
     }
@@ -586,3 +605,4 @@ namespace g_obj {
     }
 
 } // namespace g_obj
+

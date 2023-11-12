@@ -34,6 +34,9 @@ namespace g_obj {
         vector_t operator-(const vector_t &another) const {
             return {x - another.x, y - another.y, z - another.z};
         }
+        vector_t operator+(const vector_t &another) const {
+            return {x + another.x, y + another.y, z + another.z};
+        }
         vector_t get_normal() const;
  
     };
@@ -60,6 +63,8 @@ namespace g_obj {
         vector_t operator-(const point_t &another) const {
             return {x - another.x, y - another.y, z - another.z};
         }
+
+        bool operator==(const point_t &point) const;
 
     };
     
@@ -148,6 +153,7 @@ namespace g_obj {
         bool point_in_tr(const point_t &point) const;
         bool tr_in_tr(const triangle_t &triangle) const; //chech triangle inside another triangle
         bool check_tr_inter(const g_obj::triangle_t &tr2) const;
+        bool operator==(const triangle_t &triangle) const;
     };
 
     float det(float a, float b, float c, float d);
