@@ -19,6 +19,10 @@ std::vector<float> solve_alg_sys_2(float A1, float B1, float D1,
     return ans;
 }
 
+bool comp(float x, float y) {
+    return (x < y);
+}
+
 namespace g_obj {
 
     float det(float a, float b, float c, float d) {
@@ -327,6 +331,12 @@ namespace g_obj {
     float triangle_t::square() const {
         return vect_mult(vertices[1] - vertices[0],
                          vertices[2] - vertices[0]).get_len() * 0.5;
+    }
+
+    float triangle_t::len_min_side() const {
+        return std::min({vertices[0].distance(vertices[1]),
+                         vertices[1].distance(vertices[2]),
+                         vertices[2].distance(vertices[0])}, comp);
     }
 
     std::vector<g_obj::point_t> triangle_t::find_inter_points(const g_obj::line_t &inter_line) const {

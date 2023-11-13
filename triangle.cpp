@@ -1,4 +1,9 @@
 #include "geom_obj.hpp"
+#include "octree.hpp"
+
+#define octTree 1
+
+Singleton* Singleton::_instance = nullptr;
 
 g_obj::triangle_t get_triangle() {
     std::vector<g_obj::point_t> verts(3);
@@ -45,6 +50,40 @@ int main(int argc, char** argv)
     int N;
     std::cin >> N;
 
+    //using octree
+    #if octTree
+    float minimal {std::numeric_limits<float>::max()};
+    float maximum (0);
+
+    std::list<g_obj::triangle_t> all_triangles;
+    for (int i = 0; i < N; i++) {
+        triangle_t tmp_tr;
+        tmp_tr = get_triangle();
+        all_triangles.push_back(tmp_tr);
+
+        if (tmp_tr.len_min_side() < minimal)
+            minimal = tmp_tr.len_min_side();
+
+        float local_max = std::max({tmp_tr.vertices[0].distance({0, 0, 0}),
+                                tmp_tr.vertices[1].distance({0, 0, 0}),
+                                tmp_tr.vertices[2].distance({0, 0, 0})}, comp);
+        if (maximum < local_max)
+            maximum = local_max;
+    }
+
+    Singleton* min_size = Singleton::Instance();
+    if (min_size != nullptr) {
+        min_size->Set(minimal);
+        min_size->Print();
+    }
+
+    std::cout << maximum << std::endl;
+
+    #endif
+
+    //using O(N*N)
+    #if not octTree
+
     std::vector<triangle_t> triangles(N);
     for (int i = 0; i < N; i++) {
         triangles[i] = get_triangle();
@@ -70,6 +109,8 @@ int main(int argc, char** argv)
         if (triangles[i].inter == true)
             std::cout << i << std::endl;
     }
+
+    #endif    
 
     return 0;
 }

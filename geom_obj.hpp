@@ -5,6 +5,8 @@
 #include <cassert>
 #include <vector>
 #include <stdlib.h>
+#include <algorithm>
+#include <limits>
 
 #define flt_tolerance 0.00001
 
@@ -14,6 +16,8 @@ bool equal_null(float x);
 //A2*x + B2*y = D2
 std::vector<float> solve_alg_sys_2(float A1, float B1, float D1,
                                    float A2, float B2, float D2);
+
+bool comp(float x, float y);
 
 namespace g_obj {
 
@@ -149,6 +153,7 @@ namespace g_obj {
 
         void print() const;
         float square() const;
+        float len_min_side() const;
         std::vector<g_obj::point_t> find_inter_points(const g_obj::line_t &inter_line) const;
         bool point_in_tr(const point_t &point) const;
         bool tr_in_tr(const triangle_t &triangle) const; //chech triangle inside another triangle
