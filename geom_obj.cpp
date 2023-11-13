@@ -404,7 +404,8 @@ namespace g_obj {
         for (int i = 0; i < 3; i++) {
             if (vertices[(0 + i)%3] == triangle.vertices[0] &&
                 vertices[(1 + i)%3] == triangle.vertices[1] &&
-                vertices[(2 + i)%3] == triangle.vertices[2]  )
+                vertices[(2 + i)%3] == triangle.vertices[2] &&
+                number == triangle.number)
                 return true;
         }
 

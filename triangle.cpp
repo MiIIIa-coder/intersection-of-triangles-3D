@@ -3,9 +3,7 @@
 
 #define octTree 1
 
-Singleton* Singleton::_instance = nullptr;
-
-g_obj::triangle_t get_triangle() {
+g_obj::triangle_t get_triangle(int number) {
     std::vector<g_obj::point_t> verts(3);
     g_obj::point_t temp;
     for (int i = 0; i < 3; ++i) {
@@ -37,13 +35,14 @@ g_obj::triangle_t get_triangle() {
         line_arr[i] = section_arr[i].get_line();
     }
 
-    g_obj::triangle_t ret{type, verts, plane_, line_arr};
+    g_obj::triangle_t ret{type, verts, plane_, line_arr, false, number};
     return ret;
 }
 
 int main(int argc, char** argv) 
 {
     using g_obj::point_t;
+    using g_obj::vector_t;
     using g_obj::plane_t;
     using g_obj::triangle_t;
 
@@ -52,32 +51,41 @@ int main(int argc, char** argv)
 
     //using octree
     #if octTree
-    float minimal {std::numeric_limits<float>::max()};
+    float minimum {std::numeric_limits<float>::max()};
     float maximum (0);
 
     std::list<g_obj::triangle_t> all_triangles;
     for (int i = 0; i < N; i++) {
         triangle_t tmp_tr;
-        tmp_tr = get_triangle();
+        tmp_tr = get_triangle(i);
         all_triangles.push_back(tmp_tr);
 
-        if (tmp_tr.len_min_side() < minimal)
-            minimal = tmp_tr.len_min_side();
+        if (tmp_tr.len_min_side() < minimum)
+            minimum = tmp_tr.len_min_side();
 
         float local_max = std::max({tmp_tr.vertices[0].distance({0, 0, 0}),
-                                tmp_tr.vertices[1].distance({0, 0, 0}),
-                                tmp_tr.vertices[2].distance({0, 0, 0})}, comp);
+                                    tmp_tr.vertices[1].distance({0, 0, 0}),
+                                    tmp_tr.vertices[2].distance({0, 0, 0})}, comp);
         if (maximum < local_max)
             maximum = local_max;
     }
 
-    Singleton* min_size = Singleton::Instance();
-    if (min_size != nullptr) {
-        min_size->Set(minimal);
-        min_size->Print();
-    }
+    //creating global space
+    vector_t min_vec {-(maximum+1), -(maximum+1), -(maximum+1)};
+    vector_t max_vec {  maximum+1,    maximum+1,    maximum+1 };
+    octree::boundingBox global_space {min_vec, max_vec};
 
-    std::cout << maximum << std::endl;
+    //creating octree
+    octree::ocTree tree {global_space, all_triangles, minimum};
+    tree.build_tree();
+
+    //here it can die
+    //intersect triangles
+    std::list<g_obj::triangle_t> parent_global_list;
+    auto answer = tree.get_inter(parent_global_list);
+    for (auto it = answer.begin(); it != answer.end(); it++) {
+        if (it->inter) std::cout << it->number << std::endl;
+    }
 
     #endif
 
@@ -86,7 +94,7 @@ int main(int argc, char** argv)
 
     std::vector<triangle_t> triangles(N);
     for (int i = 0; i < N; i++) {
-        triangles[i] = get_triangle();
+        triangles[i] = get_triangle(i);
     }
 
     for (int i = 0; i < N; i++) {

@@ -6,16 +6,16 @@ namespace octree {
     // boundingBox
     //-------------------------------------
     bool boundingBox::valid() const{ 
-        if (min.valid() && max.valid() && min.get_len() < max.get_len()) 
+        if (min.valid() && max.valid()) 
             return true; else return false; 
     }
 
     g_obj::vector_t boundingBox::center() const {
         assert(valid());
 
-        return {(max.x - min.x) / 2,
-                (max.y - min.y) / 2,
-                (max.z - min.z) / 2};
+        return {(max.x + min.x) / 2,
+                (max.y + min.y) / 2,
+                (max.z + min.z) / 2};
     }
 
     position boundingBox::point_position(g_obj::point_t &point) const {
@@ -36,7 +36,7 @@ namespace octree {
         else return BORDER;
     }
 
-    position boundingBox::triangle_position(g_obj::triangle_t tr) const {
+    position boundingBox::triangle_position(g_obj::triangle_t &tr) const {
         if (point_position(tr.vertices[0]) == IN &&
             point_position(tr.vertices[1]) == IN &&
             point_position(tr.vertices[2]) == IN   )
@@ -53,17 +53,18 @@ namespace octree {
     // ocTree
     //-------------------------------------
     ocTree::~ocTree() {
-        for (int i = 0; i < 8; i++) {
-            delete(child_node[i]);
-        } 
+        int index = 0;
+        for (int flags = (int)m_activeNodes; flags > 0; flags >>= 1, index++) 
+            if ((flags & 1) == 1) {
+                delete(child_node[index]);
+            }
     }
 
-    ocTree *ocTree::create_node(boundingBox &region, std::list<g_obj::triangle_t> &List) {
+    ocTree *ocTree::create_node(boundingBox &region, std::list<g_obj::triangle_t> &List, float min) {
         if (List.size() == 0)
             return nullptr;
         
-        ocTree *ret = new ocTree(region, List);
-        ret->parent = this;
+        ocTree *ret = new ocTree(region, List, min);
 
         return ret;
     }
@@ -73,8 +74,10 @@ namespace octree {
             return;
         
         g_obj::vector_t dimensions = region.max - region.min;
-        if (dimensions.x < MIN_SIZE && dimensions.y < MIN_SIZE && dimensions.z < MIN_SIZE)
+        if (dimensions.x < min_size && dimensions.y < min_size && dimensions.z < min_size) {
+            std::cout << "very small box" << std::endl;
             return;
+        }
 
         g_obj::vector_t center = region.center();
 
@@ -82,11 +85,11 @@ namespace octree {
             boundingBox(region.min, center),
             boundingBox({center.x, region.min.y, region.min.z}, {region.max.x, center.y, center.z    }),
             boundingBox({center.x, region.min.y, center.z    }, {region.max.x, center.y, region.max.z}),
-            boundingBox({region.min.x, region.min.y, center.z}, {center.x, center.y, region.max.z    }),
-            boundingBox({region.min.x, region.min.y, center.z}, {center.x, center.y, region.max.z    }),
+            boundingBox({region.min.x, region.min.y, center.z}, {center.x, center.y, region.max.z    }),    
+            boundingBox({region.min.x, center.y, region.min.z}, {center.x, region.max.y, center.z    }),
             boundingBox({center.x, center.y, region.min.z    }, {region.max.x, region.max.y, center.z}),
             boundingBox(center, region.max),
-            boundingBox({region.min.x, center.y, center.z    }, {center.x, region.max.y, region.max.z}),
+            boundingBox({region.min.x, center.y, center.z    }, {center.x, region.max.y, region.max.z})
         };
 
         std::list<g_obj::triangle_t> octlist[8]; //here all obj in all octants
@@ -111,7 +114,7 @@ namespace octree {
         //creating childs
         for (int i = 0; i < 8; i++) {
             if (octlist[i].size() != 0) {
-                child_node[i] = create_node(octant[i], octlist[i]);
+                child_node[i] = create_node(octant[i], octlist[i], min_size);
                 m_activeNodes |= (std::byte)(1 << i);
                 child_node[i]->build_tree();
             }

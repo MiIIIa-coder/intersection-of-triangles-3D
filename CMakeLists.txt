@@ -5,10 +5,10 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCE_EXE triangle.cpp)
 
-set(SOURCE_LIB geom_obj.cpp)
+set(SOURCE_LIB geom_obj.cpp octree.cpp)
 
-add_library(geom_obj STATIC ${SOURCE_LIB})
+add_library(lib STATIC ${SOURCE_LIB})
 
 add_executable(${PROJECT_NAME} ${SOURCE_EXE})
 
-target_link_libraries(${PROJECT_NAME} geom_obj)
+target_link_libraries(${PROJECT_NAME} lib)

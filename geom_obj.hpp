@@ -150,6 +150,7 @@ namespace g_obj {
         plane_t plane;
         std::vector<line_t> lines;
         bool inter {false};
+        int number;
 
         void print() const;
         float square() const;
