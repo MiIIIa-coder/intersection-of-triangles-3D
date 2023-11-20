@@ -1,8 +1,10 @@
 #ifndef OCTREE_
 #define OCTREE_
 
-#include "geom_obj.hpp"
 #include <list>
+#include <cstddef>
+
+#include "geom_obj.hpp"
 
 namespace octree
 {
