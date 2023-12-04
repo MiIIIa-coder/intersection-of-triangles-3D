@@ -53,6 +53,8 @@ int main(int argc, char** argv)
     #if octTree
     float minimum {std::numeric_limits<float>::max()};
     float maximum (0);
+    bool point_exist {false};
+    bool not_point_exist {false};
 
     std::list<g_obj::triangle_t> all_triangles;
     for (int i = 0; i < N; i++) {
@@ -60,15 +62,24 @@ int main(int argc, char** argv)
         tmp_tr = get_triangle(i);
         all_triangles.push_back(tmp_tr);
 
-        if (tmp_tr.len_min_side() < minimum)
+        float min_side = tmp_tr.len_min_side();
+        if (equal_null(min_side) && !not_point_exist) 
+            point_exist = true;
+        else if (min_side < minimum && !equal_null(min_side)) {
             minimum = tmp_tr.len_min_side();
+            not_point_exist = true;
+            point_exist = false;
+        }
 
         float local_max = std::max({tmp_tr.vertices[0].distance({0, 0, 0}),
                                     tmp_tr.vertices[1].distance({0, 0, 0}),
                                     tmp_tr.vertices[2].distance({0, 0, 0})}, comp);
         if (maximum < local_max)
             maximum = local_max;
+            
     }
+    if (point_exist)  //if only points
+        minimum = flt_tolerance;
 
     //creating global space
     vector_t min_vec {-(maximum+1), -(maximum+1), -(maximum+1)};
@@ -83,7 +94,7 @@ int main(int argc, char** argv)
     //intersect triangles
     std::list<g_obj::triangle_t> parent_global_list;
     auto answer = tree.get_inter(parent_global_list);
-    for (auto it = answer.begin(); it != answer.end(); it++) {
+    for (auto it = answer.begin(); it != answer.end(); ++it) {
         if (it->inter) std::cout << it->number << std::endl;
     }
 

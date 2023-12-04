@@ -567,7 +567,7 @@ namespace g_obj {
         if (plane.parallelism(tr2.plane)) {
             if (plane.equal_parallel(tr2.plane)) {  //if planes are same
 
-                if (tr_in_tr(tr2)) return true; else return false; //if triangle in another triangle
+                if (tr_in_tr(tr2)) return true; //if triangle in another triangle
 
 
                 for (int i = 0; i < 3; i++) {
@@ -609,7 +609,7 @@ namespace g_obj {
         for (int i = 0; i < 2; i++) {
             if (check_point_belongs(inter_points1, inter_points2[i]))
                 return true;
-            else return false;        
+            //else return false;        
         }
 
         return false;
